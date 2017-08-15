@@ -4,4 +4,4 @@ For the MSc Computer Science program at ETH, you can assign your grades to diffe
 
 Fear not! Just exhaustively search all the combinations!
 
-If you'd like to use this script, edit `optimize.py` to insert your own grades and courses, then run it and find out the results! If someone wants to make a pull request, e.g. to scrape myStudies or make this otherwise more user-friendly, go ahead.
+If you'd like to use this script, edit `optimize.py` to insert your own grades and courses, then run it and find out the results! If someone wants to make a pull request, e.g. to prune the exhaustive search, scrape myStudies, or make this otherwise more user-friendly, go ahead.
