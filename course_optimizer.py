@@ -102,6 +102,10 @@ def compute_weighted_avg_by_credits(courses):
             continue
         total_credits += course.credits
         total_grade += course.credits * course.grade
+    # It's possible for this category to have no value if only pass/fail courses were assigned.
+    # Not sure how that's officially treated, so just return 0 here.
+    if total_credits == 0.0:
+        return 0.0
     return total_grade / total_credits
 
 
@@ -130,7 +134,7 @@ class Course:
         return self
 
     def passfail(self, is_passfile):
-        self._passfaile = is_passfile
+        self._is_passfail = is_passfile
         return self
 
     @property
@@ -166,16 +170,56 @@ def optimize(courses):
 def copy_assignments(assignments):
     return {category: course_list.copy() for category, course_list in assignments.items()}
 
+def possibly_satisfiable(remaining_courses, current_assignments):
+    partial_counts = create_credit_counts_from_assignments(current_assignments)
+    # try assigning the course to every valid category
+    for course in remaining_courses:
+        partial_counts._total += course.credits
+        any_focus = False
+        any_focus_and_elective = False
+        for category in course.categories:
+            if category == Category.CORE_FOCUS:
+                partial_counts._core_focus += course.credits
+                any_focus = True
+                any_focus_and_elective = True
+            elif category == Category.ELECTIVE_FOCUS:
+                any_focus = True
+                any_focus_and_elective = True
+            elif category == Category.SEMINAR_IN_FOCUS:
+                partial_counts._seminar_in_focus += course.credits
+                any_focus = True
+                any_focus_and_elective = True
+            elif category == Category.ELECTIVE_CS:
+                partial_counts._elective_cs += course.credits
+                partial_counts._focus_and_elective += course.credits
+            elif category == Category.INTERFOCUS:
+                partial_counts._interfocus += course.credits
+            elif category == Category.ELECTIVE:
+                pass
+            elif category == Category.SCIENCE_IN_PERSPECTIVE:
+                partial_counts._gess += course.credits
+            elif category == Category.THESIS:
+                partial_counts._thesis += course.credits
+        if any_focus:
+            partial_counts._focus += course.credits
+        if any_focus_and_elective:
+            partial_counts._focus_and_elective += course.credits
+    return partial_counts.all_greater_than_or_equal(MIN_CREDIT_COUNTS)
+
 
 def optimize_dfs(courses, assignments={category: [] for category in Category}, has_lab=False):
     if len(courses) == 0:
-        # TODO: check validity
         counts = create_credit_counts_from_assignments(assignments)
         if counts.all_greater_than_or_equal(MIN_CREDIT_COUNTS):
             grade = compute_grade(assignments)
             return OptimizationResult(True, grade, copy_assignments(assignments), grade)
         else:
             return OptimizationResult(False, None, None, None)
+
+    # Check if it's still possible to satisfy the requirements in the best case
+    # We could probably compute this incrementally, but I don't think it's a bottleneck yet.
+    if not possibly_satisfiable(courses, assignments):
+        return OptimizationResult(False, None, None, None)
 
     counts = create_credit_counts_from_assignments(assignments)
     # might already be viable

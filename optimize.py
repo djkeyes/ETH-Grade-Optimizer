@@ -1,5 +1,7 @@
-import course_optimizer as co
 from collections import OrderedDict
+import time
+
+import course_optimizer as co
 
 
 def main():
@@ -13,14 +15,24 @@ def main():
     #  electives.
     # -If you're a masochist and take all 3 interfocus labs, I'm not sure if you can count one as an elective or not.
     courses = [
-        co.Course("Intro to FizzBuzz", 4.0, 24, co.Category.CORE_FOCUS, co.Category.ELECTIVE,
-                  co.Category.ELECTIVE_CS,
+        co.Course("Intro to FizzBuzz", 4.75, 8, co.Category.CORE_FOCUS, co.Category.ELECTIVE, co.Category.ELECTIVE_CS,
+                  co.Category.ELECTIVE),
+        co.Course("How to Design Manhole Covers", 4.0, 6, co.Category.CORE_FOCUS, co.Category.ELECTIVE_CS,
+                  co.Category.ELECTIVE),
+        co.Course("Twiddling Your Thumbs I", 5.25, 6, co.Category.ELECTIVE_FOCUS, co.Category.ELECTIVE_CS,
+                  co.Category.ELECTIVE),
+        co.Course("Twiddling Your Thumbs II", 5.5, 6, co.Category.ELECTIVE_FOCUS, co.Category.ELECTIVE_CS,
                   co.Category.ELECTIVE),
         co.Course("Advanced methods in FizzBuzzing", 5.25, 2, co.Category.SEMINAR_IN_FOCUS),
-        co.Course("Information security: Fuzzing Busily", 5.0, 10, co.Category.ELECTIVE_CS,
-                  co.Category.ELECTIVE),
+        co.Course("Information security Lab: Fuzzing Busily", 5.0, 10, co.Category.ELECTIVE_CS,
+                  co.Category.ELECTIVE).lab(True),
+        co.Course("P = NP, Just Set N=1", 4.25, 4, co.Category.ELECTIVE_CS, co.Category.ELECTIVE),
+        co.Course("Support Vector Machine Guns", 4.75, 4, co.Category.ELECTIVE_CS, co.Category.ELECTIVE),
+        co.Course("The Pass/Fail Course", None, 10, co.Category.ELECTIVE_CS,
+                  co.Category.ELECTIVE).passfail(True),
         co.Course("Advanced computational algorithms lab", 4.0, 12, co.Category.INTERFOCUS),
-        co.Course("Intro to Buzzsaws?", 6.0, 10, co.Category.ELECTIVE),
+        co.Course("Intro to Buzzsaws", 6.0, 8, co.Category.ELECTIVE),
+        co.Course("Critical Analysis of the Bee Movie", 4.5, 6, co.Category.ELECTIVE),
         co.Course("FizzBuzz and society", 4.5, 2, co.Category.SCIENCE_IN_PERSPECTIVE),
         co.Course("Buzzing and Fizzing: What's next?", 5.5, 30, co.Category.THESIS),
     ]
@@ -31,8 +43,10 @@ def main():
         print('\t', c)
     print('=========================================')
     print('Optimizing!')
+    start = time.time()
     result = co.optimize(courses)
-    print('... complete!')
+    end = time.time()
+    print('... complete! Optimization took', (end - start), 'seconds.')
     print('=========================================')
 
     if not result.possible:
